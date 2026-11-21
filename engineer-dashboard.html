@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Engineer Workspace | Circuitech</title><link rel="stylesheet" href="css/style.css">
+<style>
+:root{--line:rgba(255,255,255,.08)}body{background:#090f1b;color:#eef3fb;font-family:Inter,system-ui,sans-serif;margin:0}.wrap{max-width:1320px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--line);padding:12px 0 22px}.brand{font-weight:800;font-size:20px;color:#f59e0b}.muted{color:#91a0b5}.actions{display:flex;gap:10px;flex-wrap:wrap}button{cursor:pointer;border:1px solid var(--line);background:#1a2638;color:#eef3fb;padding:10px 14px;border-radius:9px}.hero{padding:30px 0 22px}.hero h1{font-size:30px;margin:5px 0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:#111c2c;border:1px solid var(--line);border-radius:14px;padding:19px}.label{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#91a0b5}.metric{font-size:30px;font-weight:750;margin-top:8px}.section{margin-top:28px}.section h2{font-size:18px;margin:0 0 13px}.two{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}.sensor{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)}.sensor:last-child{border:0}.status{color:#65d6a4}.warning{color:#ffc56d}.task{padding:13px;border:1px solid var(--line);border-radius:10px;margin-top:10px}.task strong{display:block;margin-bottom:4px}.notice{font-size:13px;color:#91a0b5;margin-top:12px}.actions a{color:inherit;text-decoration:none}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}@media(max-width:520px){.grid{grid-template-columns:1fr}.wrap{padding:16px}.top{align-items:flex-start;flex-direction:column}}
+</style></head><body><div class="wrap">
+<header class="top"><div><div class="brand">☀ CIRCUITECH</div><div class="muted" style="font-size:12px">SOLAR MONITORING PLATFORM · ENGINEERING</div></div><div class="actions"><a href="select-dashboard.html"><button type="button">Switch workspace</button></a><button id="logout" type="button">Sign out</button></div></header>
+<section class="hero"><div class="label">Field operations</div><h1>Engineer Dashboard</h1><p class="muted" id="welcome">Verifying engineer access…</p></section>
+<section class="grid">
+<div class="card"><div class="label">Device connection</div><div class="metric" id="connection">Checking</div><div class="muted" id="updated">Waiting for telemetry</div></div>
+<div class="card"><div class="label">Panel voltage</div><div class="metric" id="voltage">— <small>V</small></div><div class="muted">ThingSpeak field 1</div></div>
+<div class="card"><div class="label">Panel current</div><div class="metric" id="current">— <small>A</small></div><div class="muted">ThingSpeak field 2</div></div>
+<div class="card"><div class="label">Estimated power</div><div class="metric" id="power">— <small>W</small></div><div class="muted">Voltage × current</div></div>
+</section>
+<section class="section two">
+<div class="card"><div class="label">Live diagnostics</div><h2 style="margin:8px 0 4px">Sensor readings</h2>
+<div class="sensor"><span>Humidity</span><strong id="humidity">— %</strong></div>
+<div class="sensor"><span>Dust / ultrasonic reading</span><strong id="dust">— cm</strong></div>
+<div class="sensor"><span>Last telemetry received</span><strong id="last-seen">—</strong></div>
+<div class="notice" id="telemetry-note">Live values are read from the configured ThingSpeak channel. These readings are diagnostic information, not proof of a hardware fault.</div></div>
+<div class="card"><div class="label">Engineering workspace</div><h2 style="margin:8px 0">Maintenance checklist</h2>
+<div class="task"><strong>1. Inspect panel surface</strong><span class="muted">Check dust accumulation and water distribution.</span></div>
+<div class="task"><strong>2. Verify wiper mechanism</strong><span class="muted">Inspect motor movement, linkage and end positions.</span></div>
+<div class="task"><strong>3. Check sensor readings</strong><span class="muted">Compare telemetry with physical sensor conditions.</span></div>
+<div class="task"><strong>4. Verify connectivity</strong><span class="muted">Confirm ESP32 Wi-Fi and ThingSpeak updates.</span></div>
+</div></section>
+<section class="section"><div class="card"><div class="label">Device assignment</div><h2 style="margin:8px 0">Assigned equipment</h2><p class="muted">Device assignment records will appear here once the admin assigns a solar monitoring device to this engineer. The current telemetry panel is connected to the project's configured ThingSpeak channel.</p><p class="notice" id="assignment">Checking account…</p></div></section>
+<section class="section"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;"><div><div class="label">Technical records</div><h2 style="margin:8px 0">Cleaning History</h2><p class="muted">Cleaning activity for the current prototype installation.</p></div><button id="refresh-cleaning-history" type="button">Refresh history</button></div>
+<div style="overflow-x:auto;margin-top:14px;"><table style="width:100%;border-collapse:collapse;min-width:760px;"><thead><tr><th style="text-align:left;padding:12px">Date &amp; time</th><th style="text-align:left;padding:12px">Customer</th><th style="text-align:left;padding:12px">Mode</th><th style="text-align:left;padding:12px">Trigger</th><th style="text-align:left;padding:12px">Duration</th><th style="text-align:left;padding:12px">Outcome</th><th style="text-align:left;padding:12px">Source</th></tr></thead><tbody id="engineer-cleaning-history-body"><tr><td colspan="7" class="muted" style="padding:16px">Loading cleaning history…</td></tr></tbody></table></div><p class="notice" id="engineer-cleaning-history-status"></p></div></section>
+
+<section class="section"><div class="card"><div class="label">Service documentation</div><h2 style="margin:8px 0">Create maintenance record</h2><p class="muted">Record an inspection, fault, repair or service action. These are engineer-entered records, not automatic hardware diagnostics.</p>
+<form id="maintenance-form" style="display:grid;gap:10px;max-width:760px;margin-top:14px">
+<label>Issue / maintenance title<input id="maintenance-title" required maxlength="100" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:11px;border-radius:8px;border:1px solid var(--line);background:#0b1422;color:#eef3fb"></label>
+<label>Category<select id="maintenance-category" style="display:block;width:100%;margin-top:5px;padding:11px;border-radius:8px;border:1px solid var(--line);background:#0b1422;color:#eef3fb"><option value="inspection">General inspection</option><option value="cleaning-mechanism">Cleaning mechanism / wiper</option><option value="sensor">Sensor</option><option value="connectivity">ESP32 / connectivity</option><option value="electrical">Electrical / power</option><option value="other">Other</option></select></label>
+<label>Findings and action taken<textarea id="maintenance-description" required maxlength="1500" rows="4" style="display:block;width:100%;box-sizing:border-box;margin-top:5px;padding:11px;border-radius:8px;border:1px solid var(--line);background:#0b1422;color:#eef3fb"></textarea></label>
+<label>Status<select id="maintenance-status" style="display:block;width:100%;margin-top:5px;padding:11px;border-radius:8px;border:1px solid var(--line);background:#0b1422;color:#eef3fb"><option value="open">Open</option><option value="in-progress">In progress</option><option value="resolved">Resolved</option></select></label>
+<div><button type="submit">Save maintenance record</button> <span class="notice" id="maintenance-form-status" role="status"></span></div></form></div></section>
+<section class="section"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><div class="label">Service log</div><h2 style="margin:8px 0">Maintenance Records</h2></div><button id="refresh-maintenance" type="button">Refresh records</button></div>
+<div style="overflow-x:auto;margin-top:14px"><table style="width:100%;border-collapse:collapse;min-width:720px"><thead><tr><th style="text-align:left;padding:12px">Date</th><th style="text-align:left;padding:12px">Title</th><th style="text-align:left;padding:12px">Category</th><th style="text-align:left;padding:12px">Findings / action</th><th style="text-align:left;padding:12px">Status</th></tr></thead><tbody id="maintenance-records-body"><tr><td colspan="5" class="muted" style="padding:16px">Loading maintenance records…</td></tr></tbody></table></div><p class="notice" id="maintenance-records-notice"></p></div></section>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="js/firebase.js"></script>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);
+ const CHANNEL='3531242',KEY='VSKXXRE6IET6WPZJ';
+ async function start(){
+  if(!await FirebaseServices.requireRole('engineer'))return;
+  const user=FirebaseServices.auth.currentUser,p=await FirebaseServices.getCurrentProfile();
+  $('welcome').textContent='Welcome, '+(p.displayName||user.email)+'. Review live telemetry and complete equipment inspections.';
+  $('assignment').textContent='Signed in as '+(user.email||'engineer')+'. Assigned device records have not been configured yet.';
+  await refresh();setInterval(refresh,15000);
+  await loadCleaningHistory();$('refresh-cleaning-history').addEventListener('click',loadCleaningHistory);
+  await loadMaintenanceRecords();$('refresh-maintenance').addEventListener('click',loadMaintenanceRecords);$('maintenance-form').addEventListener('submit',saveMaintenanceRecord);
+ }
+ function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+ async function loadCleaningHistory(){
+  const body=$('engineer-cleaning-history-body');body.innerHTML='<tr><td colspan="7" class="muted" style="padding:16px">Loading…</td></tr>';
+  try{const records=await FirebaseServices.getCleaningHistory(200);
+   body.innerHTML=records.length?records.map(r=>{const d=r.completedAt&&r.completedAt.toDate?r.completedAt.toDate().toLocaleString():'—';const n=Number(r.durationSeconds);return `<tr><td style="padding:12px">${esc(d)}</td><td style="padding:12px">${esc(r.userName||r.userEmail||'—')}</td><td style="padding:12px">${esc(r.mode||'—')}</td><td style="padding:12px">${esc(r.triggerReason||'—')}</td><td style="padding:12px">${Number.isFinite(n)?n.toFixed(1)+' sec':'—'}</td><td style="padding:12px">${esc(r.outcome||'—')}</td><td style="padding:12px">${r.isSimulated?'Simulated':'Hardware'}</td></tr>`;}).join(''):'<tr><td colspan="7" class="muted" style="padding:16px">No cleaning records found.</td></tr>';
+   $('engineer-cleaning-history-status').textContent=`Showing ${records.length} recent record(s).`;
+  }catch(e){console.error(e);body.innerHTML='<tr><td colspan="7" class="muted" style="padding:16px">Could not load cleaning history.</td></tr>';$('engineer-cleaning-history-status').textContent=e.message;}
+ }
+ async function saveMaintenanceRecord(event){
+  event.preventDefault();const status=$('maintenance-form-status');status.textContent='Saving…';
+  try{await FirebaseServices.createMaintenanceRecord({title:$('maintenance-title').value,category:$('maintenance-category').value,description:$('maintenance-description').value,status:$('maintenance-status').value});$('maintenance-form').reset();status.textContent='Maintenance record saved.';await loadMaintenanceRecords();}
+  catch(e){console.error(e);status.textContent=e.message;}
+ }
+ async function loadMaintenanceRecords(){
+  const body=$('maintenance-records-body');body.innerHTML='<tr><td colspan="5" class="muted" style="padding:16px">Loading…</td></tr>';
+  try{const rows=await FirebaseServices.getMaintenanceRecords(100);body.innerHTML=rows.length?rows.map(r=>{const d=r.createdAt&&r.createdAt.toDate?r.createdAt.toDate().toLocaleString():'—';return `<tr><td style="padding:12px">${esc(d)}</td><td style="padding:12px">${esc(r.title)}</td><td style="padding:12px">${esc(r.category)}</td><td style="padding:12px">${esc(r.description)}</td><td style="padding:12px"><select data-maintenance-id="${esc(r.id)}" class="maintenance-status-select"><option value="open" ${r.status==='open'?'selected':''}>Open</option><option value="in-progress" ${r.status==='in-progress'?'selected':''}>In progress</option><option value="resolved" ${r.status==='resolved'?'selected':''}>Resolved</option></select></td></tr>`;}).join(''):'<tr><td colspan="5" class="muted" style="padding:16px">No maintenance records yet.</td></tr>';
+  body.querySelectorAll('.maintenance-status-select').forEach(sel=>sel.addEventListener('change',async()=>{try{await FirebaseServices.updateMaintenanceRecord(sel.dataset.maintenanceId,{status:sel.value});$('maintenance-records-notice').textContent='Maintenance status updated.';}catch(e){$('maintenance-records-notice').textContent=e.message;await loadMaintenanceRecords();}}));$('maintenance-records-notice').textContent=`Showing ${rows.length} maintenance record(s).`;
+  }catch(e){console.error(e);body.innerHTML='<tr><td colspan="5" class="muted" style="padding:16px">Could not load maintenance records.</td></tr>';$('maintenance-records-notice').textContent=e.message;}
+ }
+ async function refresh(){
+  try{
+   const url=`https://api.thingspeak.com/channels/${CHANNEL}/feeds.json?api_key=${KEY}&results=1`;
+   const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
+   const data=await res.json();const f=data.feeds&&data.feeds[0];if(!f)throw new Error('No telemetry records returned');
+   const v=Number(f.field1),c=Number(f.field2),h=Number(f.field3),d=Number(f.field4);
+   $('connection').textContent='ONLINE';$('connection').className='metric status';
+   $('voltage').innerHTML=(Number.isFinite(v)?v.toFixed(2):'—')+' <small>V</small>';
+   $('current').innerHTML=(Number.isFinite(c)?c.toFixed(2):'—')+' <small>A</small>';
+   $('power').innerHTML=(Number.isFinite(v*c)?(v*c).toFixed(2):'—')+' <small>W</small>';
+   $('humidity').textContent=(Number.isFinite(h)?h.toFixed(1):'—')+' %';
+   $('dust').textContent=(Number.isFinite(d)?d.toFixed(1):'—')+' cm';
+   const t=new Date(f.created_at);$('last-seen').textContent=t.toLocaleString();$('updated').textContent='Updated '+t.toLocaleTimeString();
+  }catch(e){$('connection').textContent='OFFLINE';$('connection').className='metric warning';$('updated').textContent=e.message;}
+ }
+ $('logout').addEventListener('click',async()=>{await FirebaseServices.signOut();location.replace('login.html');});
+ start().catch(e=>{console.error(e);$('welcome').textContent='Unable to verify engineer access: '+e.message;});
+})();
+</script></body></html>

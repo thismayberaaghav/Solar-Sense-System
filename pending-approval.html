@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Account Awaiting Approval | Circuitech</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body{min-height:100vh;background:#0b1220;color:#e5edf7;font-family:Inter,Arial,sans-serif;display:grid;place-items:center;padding:24px}
+    .panel{width:min(760px,100%);background:#121e30;border:1px solid #26364c;border-radius:18px;padding:32px}
+    h1{margin:0 0 10px} .muted{color:#9badc3;line-height:1.6} li{margin:12px 0}
+    button{background:#7c9cff;color:#07101e;border:0;border-radius:9px;padding:11px 18px;font-weight:700;cursor:pointer}
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <p class="muted">CIRCUITECH · SOLAR MONITORING</p>
+    <h1>Account Awaiting Approval</h1>
+    <p class="muted">Your Google account is authenticated, but an administrator must assign a role and activate the account before dashboard access.</p>
+    <h3>Planned workspace</h3><ul><li>Contact your system administrator to request Client, Engineer or Admin access.</li></ul>
+    <p class="muted" id="profile-status">Verifying your account…</p>
+    <button id="logout" type="button">Sign out</button>
+  </main>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/db.js"></script>
+  <script>
+    (async function() {
+      const user = await new Promise(resolve => window.FirebaseServices.auth.onAuthStateChanged(resolve));
+      if (!user) { window.location.replace('login.html'); return; }
+      const profile = await window.FirebaseServices.getCurrentProfile();
+      document.getElementById('profile-status').textContent =
+        'Signed in as ' + ((profile && profile.displayName) || 'User') + ' · Role: __no_role__';
+    })();
+    document.getElementById('logout').addEventListener('click', async function() {
+      await window.FirebaseServices.signOut();
+      window.location.replace('login.html');
+    });
+  </script>
+</body></html>

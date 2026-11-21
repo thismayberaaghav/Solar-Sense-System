@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Workspace | Circuitech</title><link rel="stylesheet" href="css/style.css">
+<style>
+:root{--line:rgba(255,255,255,.08)}body{background:#090f1b;color:#eef3fb;font-family:Inter,system-ui,sans-serif;margin:0}.wrap{max-width:1400px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;border-bottom:1px solid var(--line);padding:12px 0 22px}.brand{font-weight:800;font-size:20px;color:#f59e0b}.muted{color:#91a0b5}.actions{display:flex;gap:10px;flex-wrap:wrap}button,select,input{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:#1a2638;color:#eef3fb;padding:10px 14px;border-radius:9px}button.primary{background:linear-gradient(135deg,#f59e0b,#f97316);color:#17120a;border:0;font-weight:700}.hero{padding:30px 0 22px}.hero h1{font-size:30px;margin:5px 0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:#111c2c;border:1px solid var(--line);border-radius:14px;padding:19px}.metric{font-size:30px;font-weight:750;margin-top:8px}.label{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#91a0b5}.section{margin-top:28px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}.section h2{font-size:18px;margin:0}.table-wrap{overflow:auto;background:#111c2c;border:1px solid var(--line);border-radius:14px}table{width:100%;border-collapse:collapse;min-width:760px}th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--line);font-size:13px}th{color:#91a0b5;font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.7px}td select{background:#0b1422;color:#eef3fb;border:1px solid #34445b;border-radius:7px;padding:7px}.pill{display:inline-block;border-radius:99px;padding:4px 9px;font-size:11px;background:#20364a;color:#a9d8ff}.pill.active{background:#123a30;color:#73e0b6}.pill.pending{background:#493719;color:#ffd17c}.toolbar{display:flex;gap:9px;flex-wrap:wrap}.toolbar input{background:#0b1422;color:white;border:1px solid #34445b;border-radius:8px;padding:10px;min-width:220px}.rolechecks{display:flex;gap:8px;flex-wrap:wrap}.rolechecks label{font-size:12px;color:#cbd5e1}.notice{margin-top:12px;color:#ffc56d;font-size:13px;min-height:20px}.empty{padding:28px;text-align:center;color:#91a0b5}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.grid{grid-template-columns:1fr}.wrap{padding:16px}.top{align-items:flex-start;flex-direction:column}}
+</style></head><body><div class="wrap">
+<header class="top"><div><div class="brand">☀ CIRCUITECH</div><div class="muted" style="font-size:12px">SOLAR MONITORING PLATFORM · ADMINISTRATION</div></div><div class="actions"><a href="select-dashboard.html"><button id="switch" type="button">Switch workspace</button></a><button id="logout" type="button">Sign out</button></div></header>
+<section class="hero"><div class="label">Control centre</div><h1>Administrator Dashboard</h1><p class="muted" id="welcome">Verifying administrator access…</p></section>
+<section class="grid">
+<div class="card"><div class="label">Registered users</div><div class="metric" id="total-users">—</div><div class="muted">All Firebase profiles</div></div>
+<div class="card"><div class="label">Active accounts</div><div class="metric" id="active-users">—</div><div class="muted">Approved platform access</div></div>
+<div class="card"><div class="label">Pending approval</div><div class="metric" id="pending-users">—</div><div class="muted">Awaiting role assignment</div></div>
+<div class="card"><div class="label">Engineers</div><div class="metric" id="engineer-users">—</div><div class="muted">Accounts with engineer role</div></div>
+</section>
+<section class="section"><div class="section-head"><h2>User & role management</h2><div class="toolbar"><input id="search" type="search" placeholder="Search name or email"><button id="refresh">Refresh</button></div></div>
+<div class="table-wrap"><table><thead><tr><th>User</th><th>Email</th><th>Roles</th><th>Account status</th><th>Actions</th></tr></thead><tbody id="users-body"><tr><td colspan="5" class="empty">Loading user profiles…</td></tr></tbody></table></div><div class="notice" id="notice" role="status"></div></section>
+<section class="section"><div class="section-head"><h2>Cleaning History · All clients</h2><button id="refresh-cleaning-history" type="button">Refresh history</button></div>
+<div class="table-wrap"><table><thead><tr><th>Date &amp; time</th><th>Customer</th><th>Email</th><th>Mode</th><th>Reason</th><th>Duration</th><th>Outcome</th><th>Source</th></tr></thead><tbody id="admin-cleaning-history-body"><tr><td colspan="8" class="empty">Loading cleaning history…</td></tr></tbody></table></div><div class="notice" id="cleaning-history-notice" role="status"></div></section>
+<section class="section grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+<div class="card"><div class="label">Platform overview</div><h2 style="margin:10px 0">Device monitoring</h2><p class="muted">Solar device telemetry continues to be collected through your existing ThingSpeak channel. Device registration and assignment can be added as the next backend module.</p></div>
+<div class="card"><div class="label">Administrator account</div><h2 id="admin-name" style="margin:10px 0">—</h2><p class="muted" id="admin-email">—</p><p class="muted" style="margin-top:10px">Role changes made here are saved to Cloud Firestore.</p></div>
+</section></div>
+<section class="section"><div class="section-head"><h2>Engineer Maintenance Records</h2><button id="refresh-maintenance-admin" type="button">Refresh records</button></div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Engineer</th><th>Title</th><th>Category</th><th>Findings / action</th><th>Status</th></tr></thead><tbody id="admin-maintenance-body"><tr><td colspan="6" class="empty">Loading maintenance records…</td></tr></tbody></table></div><div class="notice" id="admin-maintenance-notice" role="status"></div></section>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script><script src="js/firebase.js"></script>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);let allUsers=[];
+ const roleNames=['client','admin','engineer'];
+ const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ async function start(){
+  if(!await FirebaseServices.requireRole('admin'))return;
+  const user=FirebaseServices.auth.currentUser, profile=await FirebaseServices.getCurrentProfile();
+  $('welcome').textContent='Welcome back, '+(profile.displayName||user.email)+'. Manage platform access and user roles.';
+  $('admin-name').textContent=profile.displayName||'Administrator';$('admin-email').textContent=user.email||'';
+  await loadUsers();
+  await loadCleaningHistory();
+  $('refresh-cleaning-history').addEventListener('click',loadCleaningHistory);
+  await loadMaintenanceRecords();$('refresh-maintenance-admin').addEventListener('click',loadMaintenanceRecords);
+ }
+ function escapeHtml(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+ async function loadCleaningHistory(){
+  const body=$('admin-cleaning-history-body');body.innerHTML='<tr><td colspan="8" class="empty">Loading…</td></tr>';
+  try{const records=await FirebaseServices.getCleaningHistory(200);
+   body.innerHTML=records.length?records.map(r=>{const d=r.completedAt&&r.completedAt.toDate?r.completedAt.toDate().toLocaleString():'—';const n=Number(r.durationSeconds);return `<tr><td>${escapeHtml(d)}</td><td>${escapeHtml(r.userName||'—')}</td><td>${escapeHtml(r.userEmail||r.userId||'—')}</td><td>${escapeHtml(r.mode||'—')}</td><td>${escapeHtml(r.triggerReason||'—')}</td><td>${Number.isFinite(n)?n.toFixed(1)+' sec':'—'}</td><td>${escapeHtml(r.outcome||'—')}</td><td>${r.isSimulated?'Simulated':'Hardware'}</td></tr>`;}).join(''):'<tr><td colspan="8" class="empty">No cleaning records found.</td></tr>';
+   $('cleaning-history-notice').textContent=`Showing ${records.length} recent record(s) across the platform.`;
+  }catch(e){console.error(e);body.innerHTML='<tr><td colspan="8" class="empty">Could not load cleaning history.</td></tr>';$('cleaning-history-notice').textContent=e.message;}
+ }
+ async function loadMaintenanceRecords(){
+  const body=$('admin-maintenance-body');if(!body)return;body.innerHTML='<tr><td colspan="6" class="empty">Loading…</td></tr>';
+  try{const rows=await FirebaseServices.getMaintenanceRecords(200);body.innerHTML=rows.length?rows.map(r=>{const d=r.createdAt&&r.createdAt.toDate?r.createdAt.toDate().toLocaleString():'—';return `<tr><td>${esc(d)}</td><td>${esc(r.engineerName||r.engineerEmail||'—')}</td><td>${esc(r.title)}</td><td>${esc(r.category)}</td><td>${esc(r.description)}</td><td>${esc(r.status)}</td></tr>`;}).join(''):'<tr><td colspan="6" class="empty">No maintenance records yet.</td></tr>';$('admin-maintenance-notice').textContent=`Showing ${rows.length} record(s).`;}
+  catch(e){console.error(e);body.innerHTML='<tr><td colspan="6" class="empty">Could not load maintenance records.</td></tr>';$('admin-maintenance-notice').textContent=e.message;}
+ }
+ async function loadUsers(){
+  $('users-body').innerHTML='<tr><td colspan="5" class="empty">Loading…</td></tr>';
+  try{const snap=await FirebaseServices.firestore.collection('users').get();allUsers=snap.docs.map(d=>({id:d.id,...d.data()}));render();}
+  catch(e){console.error(e);$('users-body').innerHTML='<tr><td colspan="5" class="empty">Could not load users. Check Firestore rules.</td></tr>';$('notice').textContent=e.message;}
+ }
+ function render(){
+  const active=allUsers.filter(u=>String(u.status).toLowerCase()==='active'),pending=allUsers.filter(u=>String(u.status).toLowerCase()!=='active');
+  $('total-users').textContent=allUsers.length;$('active-users').textContent=active.length;$('pending-users').textContent=pending.length;
+  $('engineer-users').textContent=allUsers.filter(u=>(u.roles||[u.role]).includes('engineer')).length;
+  const q=$('search').value.toLowerCase();
+  const shown=allUsers.filter(u=>(u.displayName||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q));
+  $('users-body').innerHTML=shown.map(u=>{
+   const roles=Array.isArray(u.roles)?u.roles:(u.role?[u.role]:[]);
+   const checks=roleNames.map(r=>`<label><input type="checkbox" data-role="${r}" ${roles.includes(r)?'checked':''}> ${r}</label>`).join('');
+   return `<tr data-uid="${esc(u.id)}"><td><strong>${esc(u.displayName||'Unnamed user')}</strong><br><span class="muted">${esc(u.id)}</span></td><td>${esc(u.email)}</td><td><div class="rolechecks">${checks}</div></td><td><span class="pill ${u.status==='active'?'active':'pending'}">${esc(u.status||'pending')}</span></td><td><button class="save-user primary" type="button">Save access</button></td></tr>`;
+  }).join('')||'<tr><td colspan="5" class="empty">No matching users.</td></tr>';
+  document.querySelectorAll('.save-user').forEach(b=>b.addEventListener('click',saveUser));
+ }
+ async function saveUser(event){
+  const row=event.currentTarget.closest('tr'),uid=row.dataset.uid;
+  const roles=[...row.querySelectorAll('[data-role]:checked')].map(x=>x.dataset.role);
+  if(!roles.length){$('notice').textContent='Assign at least one role before activating this account.';return;}
+  const primary=roles.includes('admin')?'admin':roles[0];
+  const user=allUsers.find(u=>u.id===uid);
+  const status='active';
+  if(uid===FirebaseServices.auth.currentUser.uid && !roles.includes('admin')){$('notice').textContent='You cannot remove your own admin role from this screen.';return;}
+  const btn=event.currentTarget;btn.disabled=true;btn.textContent='Saving…';
+  try{
+   await FirebaseServices.firestore.collection('users').doc(uid).update({roles,role:primary,status});
+   const target=allUsers.find(u=>u.id===uid);target.roles=roles;target.role=primary;target.status=status;
+   $('notice').textContent='Access updated for '+(user.email||uid)+'.';render();
+  }catch(e){console.error(e);$('notice').textContent='Could not save changes: '+e.message;btn.disabled=false;btn.textContent='Save access';}
+ }
+ $('search').addEventListener('input',render);$('refresh').addEventListener('click',loadUsers);
+ $('logout').addEventListener('click',async()=>{await FirebaseServices.signOut();location.replace('login.html');});
+ start().catch(e=>{console.error(e);$('notice').textContent=e.message;});
+})();
+</script></body></html>

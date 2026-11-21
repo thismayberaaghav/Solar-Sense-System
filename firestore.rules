@@ -1,0 +1,154 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid));
+    }
+    function hasRole(uid, roleName) {
+      return userDoc(uid).data.role == roleName
+        || ('roles' in userDoc(uid).data && roleName in userDoc(uid).data.roles);
+    }
+    function isActiveAdmin() {
+      return signedIn()
+        && userDoc(request.auth.uid).data.status == 'active'
+        && hasRole(request.auth.uid, 'admin');
+    }
+    function isActiveClient() {
+      return signedIn()
+        && userDoc(request.auth.uid).data.status == 'active'
+        && hasRole(request.auth.uid, 'client');
+    }
+    function isActiveEngineer() {
+      return signedIn()
+        && userDoc(request.auth.uid).data.status == 'active'
+        && hasRole(request.auth.uid, 'engineer');
+    }
+    function validCleaningHistoryCreate() {
+      return request.resource.data.keys().hasOnly([
+          'userId', 'userEmail', 'userName', 'mode', 'triggerReason',
+          'outcome', 'durationSeconds', 'dustDistanceBefore',
+          'humidityAtCleaning', 'startedAt', 'completedAt', 'source',
+          'isSimulated', 'createdAt'
+        ])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.mode in ['manual', 'auto']
+        && request.resource.data.outcome in ['completed', 'stopped']
+        && request.resource.data.durationSeconds is number
+        && request.resource.data.durationSeconds >= 0
+        && request.resource.data.source == 'dashboard-simulation'
+        && request.resource.data.isSimulated == true
+        && request.resource.data.createdAt == request.time;
+    }
+
+    match /users/{userId} {
+      allow read: if isActiveAdmin() || (signedIn() && request.auth.uid == userId);
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.role == null
+        && request.resource.data.status == 'pending';
+      allow update: if isActiveAdmin()
+        || (signedIn() && request.auth.uid == userId
+          && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['displayName', 'photoURL', 'lastLoginAt']));
+      allow delete: if false;
+    }
+
+    function validSchedule() {
+      return request.resource.data.keys().hasAll(['userId', 'scheduledFor', 'status', 'mode', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['userId', 'scheduledFor', 'status', 'mode', 'createdAt', 'updatedAt'])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.scheduledFor is timestamp
+        && request.resource.data.status in ['active', 'paused']
+        && request.resource.data.mode == 'manual-scheduled';
+    }
+
+    match /cleaningSchedules/{scheduleId} {
+      allow create: if isActiveClient() && validSchedule()
+        && request.resource.data.status == 'active'
+        && request.resource.data.scheduledFor > request.time
+        && request.resource.data.scheduledFor < request.time + duration.value(366, 'd')
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow read: if isActiveAdmin() || (isActiveClient() && resource.data.userId == request.auth.uid);
+      allow update: if isActiveClient() && resource.data.userId == request.auth.uid
+        && validSchedule()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['scheduledFor', 'status', 'updatedAt'])
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.scheduledFor > request.time
+        && request.resource.data.scheduledFor < request.time + duration.value(366, 'd');
+      allow delete: if isActiveClient() && resource.data.userId == request.auth.uid;
+    }
+
+    match /cleaningHistory/{eventId} {
+      allow create: if isActiveClient() && validCleaningHistoryCreate();
+      allow read: if isActiveAdmin() || isActiveEngineer()
+        || (isActiveClient() && resource.data.userId == request.auth.uid);
+      allow update, delete: if false;
+    }
+
+    function validMaintenanceCreate() {
+      return request.resource.data.keys().hasOnly([
+        'engineerUid', 'engineerName', 'engineerEmail', 'title', 'description',
+        'category', 'status', 'createdAt', 'updatedAt'
+      ])
+      && request.resource.data.engineerUid == request.auth.uid
+      && request.resource.data.title is string
+      && request.resource.data.title.size() > 0
+      && request.resource.data.title.size() <= 100
+      && request.resource.data.description is string
+      && request.resource.data.description.size() > 0
+      && request.resource.data.description.size() <= 1500
+      && request.resource.data.category in ['inspection', 'cleaning-mechanism', 'sensor', 'connectivity', 'electrical', 'other']
+      && request.resource.data.status in ['open', 'in-progress', 'resolved']
+      && request.resource.data.createdAt == request.time
+      && request.resource.data.updatedAt == request.time;
+    }
+
+    match /maintenanceRecords/{recordId} {
+      allow create: if isActiveEngineer() && validMaintenanceCreate();
+      allow read: if isActiveAdmin() || (isActiveEngineer() && resource.data.engineerUid == request.auth.uid);
+      allow update: if isActiveEngineer()
+        && resource.data.engineerUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt'])
+        && request.resource.data.status in ['open', 'in-progress', 'resolved']
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
+    }
+
+    // Client requests one physical sweep. Only the assigned device identity
+    // (an active Engineer account) can claim and complete the command.
+    match /cleaningCommands/{commandId} {
+      allow create: if isActiveClient()
+        && request.resource.data.keys().hasOnly([
+          'userId', 'userEmail', 'deviceId', 'command', 'status', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.deviceId == 'solarsense-01'
+        && request.resource.data.command == 'CLEAN_ONCE'
+        && request.resource.data.status == 'queued'
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+      allow read: if (isActiveClient() && resource.data.userId == request.auth.uid)
+        || (isActiveEngineer() && resource.data.deviceId == 'solarsense-01');
+      allow update: if (
+          isActiveClient()
+          && resource.data.userId == request.auth.uid
+          && resource.data.status in ['queued', 'running']
+          && request.resource.data.status == 'stop-requested'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        ) || (
+          isActiveEngineer()
+          && resource.data.deviceId == 'solarsense-01'
+          && resource.data.status in ['queued', 'running', 'stop-requested']
+          && request.resource.data.status in ['running', 'completed', 'stopped', 'failed']
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'status', 'startedAt', 'completedAt', 'result', 'updatedAt'
+          ])
+        );
+      allow delete: if false;
+    }
+
+  }
+}
